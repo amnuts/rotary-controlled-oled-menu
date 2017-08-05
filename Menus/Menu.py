@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 class Menu:
 
-    def __init__(self, options):
+    def __init__(self, options=[]):
         self.options = options
         self.highlightOption = None
         self.rowCount = 3
@@ -20,6 +20,10 @@ class Menu:
         self.image = Image.new('1', (self.oled.width, self.oled.height))
         self.draw = ImageDraw.Draw(self.image)
         self.font = ImageFont.truetype(os.path.dirname(__file__) + '/pixel_arial_11.ttf', 8)
+
+    def set_options(self, options):
+        self.options = options
+        self.highlightOption = None
 
     def blank(self, draw=False):
         self.draw.rectangle((0, 0, self.oled.width, self.oled.height), outline=0, fill=0)
@@ -45,12 +49,12 @@ class Menu:
             self.highlightOption = highlight
 
         # adjust the start/end positions of the range
-        if self.highlightOption >= (len(self.options) - self.rowCount):
+        if (self.highlightOption is None) or (self.highlightOption < self.rowCount):
+            start = 0
+            end = self.rowCount
+        elif self.highlightOption >= (len(self.options) - self.rowCount):
             end = len(self.options)
             start = end - self.rowCount
-        elif self.highlightOption is None or self.highlightOption <= self.rowCount:
-            start = 0
-            end = start + self.rowCount
         else:
             start = self.highlightOption
             end = start + self.rowCount
@@ -60,8 +64,7 @@ class Menu:
         for x in range(start, end):
             fill = 1
             if self.highlightOption is not None and self.highlightOption == x:
-                at_row_height = 0 if top == 0 else top
-                self.draw.rectangle([0, at_row_height, self.oled.width, at_row_height + 11], outline=0, fill=1)
+                self.draw.rectangle([0, top, self.oled.width, top + 11], outline=0, fill=1)
                 fill = 0
             self.draw.text((3, top + 1), self.options[x], font=self.font, fill=fill)
             top += 10
