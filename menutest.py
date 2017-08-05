@@ -1,3 +1,5 @@
+import sys
+
 from Menus.Menu import Menu
 
 m = Menu([
@@ -9,5 +11,10 @@ m = Menu([
     "Support the sixth"
 ])
 
-m.render(2)
-
+if len(sys.argv) > 1:
+    if sys.argv[1] == 'clear':
+        m.blank(True)
+    else:
+        m.render(int(sys.argv[1]))
+else:
+    m.render()
