@@ -1,6 +1,8 @@
 import sys
+from time import sleep
 
 from Menus.Menu import Menu
+from Input.Rotary import Rotary
 
 m = Menu([
     "First line",
@@ -11,10 +13,16 @@ m = Menu([
     "Support the sixth"
 ])
 
+r = Rotary(**{'menu': m, 'clk': 29, 'dt': 31, 'btn': 37})
+
 if len(sys.argv) > 1:
     if sys.argv[1] == 'clear':
         m.blank(True)
     else:
-        m.render(int(sys.argv[1]))
+        m.set_highlight(int(sys.argv[1]))
+        m.render()
 else:
     m.render()
+
+while True:
+    sleep(1)
