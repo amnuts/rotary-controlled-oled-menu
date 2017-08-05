@@ -20,8 +20,11 @@ class Menu:
         self.draw = ImageDraw.Draw(self.image)
         self.font = ImageFont.truetype(os.path.dirname(__file__) + '/pixel_arial_11.ttf', 8)
 
-    def blank(self):
+    def blank(self, draw=False):
         self.draw.rectangle((0, 0, self.oled.width, self.oled.height), outline=0, fill=0)
+        if draw:
+            self.oled.image(self.image)
+            self.oled.display()
 
     def render(self, highlight=None):
         if highlight < 0:
