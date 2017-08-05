@@ -21,15 +21,15 @@
 import math
 import time
 
-import SSD1306
 import RPi.GPIO
-
 from PIL import Image
-from PIL import ImageFont
 from PIL import ImageDraw
+from PIL import ImageFont
+
+from Adafruit import SSD1306
 
 # 128x32 display with hardware I2C:
-disp = SSD1306.SSD1306_128_32(rst=None,gpio=RPi.GPIO)
+disp = SSD1306.SSD1306_128_32(rst=None, gpio=RPi.GPIO)
 
 # Initialize library.
 disp.begin()

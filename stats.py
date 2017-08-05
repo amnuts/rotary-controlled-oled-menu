@@ -18,16 +18,15 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+import subprocess
 import time
 
 import RPi.GPIO
-import SSD1306
-
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-import subprocess
+from Adafruit import SSD1306
 
 disp = SSD1306.SSD1306_128_32(rst=None, gpio=RPi.GPIO)
 
