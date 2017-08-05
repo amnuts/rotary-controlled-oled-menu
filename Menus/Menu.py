@@ -9,7 +9,7 @@ class Menu:
 
     def __init__(self, options):
         self.options = options
-        self.onOption = None
+        self.highlightOption = None
         self.rowCount = 3
 
         self.oled = SSD1306.SSD1306_128_32(rst=None, gpio=GPIO)
@@ -36,30 +36,30 @@ class Menu:
     def __build(self, highlight):
         # sanity check the highlight value
         if highlight is None:
-            self.onOption = None
+            self.highlightOption = None
         elif highlight < 0:
-            self.onOption = 0
+            self.highlightOption = 0
         elif highlight >= len(self.options):
-            self.onOption = len(self.options) - 1
+            self.highlightOption = len(self.options) - 1
         else:
-            self.onOption = highlight
+            self.highlightOption = highlight
 
         # adjust the start/end positions of the range
-        if self.onOption >= (len(self.options) - self.rowCount):
+        if self.highlightOption >= (len(self.options) - self.rowCount):
             end = len(self.options)
             start = end - self.rowCount
-        elif self.onOption is None or self.onOption <= self.rowCount:
+        elif self.highlightOption is None or self.highlightOption <= self.rowCount:
             start = 0
             end = start + self.rowCount
         else:
-            start = self.onOption
+            start = self.highlightOption
             end = start + self.rowCount
 
         # draw the menu options
         top = 0
         for x in range(start, end):
             fill = 1
-            if self.onOption is not None and self.onOption == x:
+            if self.highlightOption is not None and self.highlightOption == x:
                 at_row_height = 0 if top == 0 else top
                 self.draw.rectangle([0, at_row_height, self.oled.width, at_row_height + 11], outline=0, fill=1)
                 fill = 0
