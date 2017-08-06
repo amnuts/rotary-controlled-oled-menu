@@ -39,9 +39,7 @@ class Menu:
             self.highlightOption = highlight
 
     def change_highlight(self, by):
-        print "Changing by {}.  highlightOption was {}.  ".format(by, self.highlightOption)
         self.set_highlight(0 if self.highlightOption is None else self.highlightOption + by)
-        print "Is now {}".format(self.highlightOption)
 
     def blank(self, draw=False):
         self.draw.rectangle((-1, -1, self.oled.width+1, self.oled.height+1), outline=0, fill=0)
