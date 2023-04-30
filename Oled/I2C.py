@@ -26,12 +26,13 @@ import subprocess
 def reverseByteOrder(data):
     """Reverses the byte order of an int (16-bit) or long (32-bit) value."""
     # Courtesy Vishal Sapre
-    byteCount = len(hex(data)[2:].replace('L','')[::2])
-    val       = 0
+    byteCount = len(hex(data)[2:].replace('L', '')[::2])
+    val = 0
     for i in range(byteCount):
-        val    = (val << 8) | (data & 0xff)
+        val = (val << 8) | (data & 0xff)
         data >>= 8
     return val
+
 
 def get_default_bus():
     """Return the default bus number based on the device platform.  For a
@@ -39,6 +40,7 @@ def get_default_bus():
     For a Beaglebone Black the first user accessible bus, 1, will be returned.
     """
     return 1
+
 
 def get_i2c_device(address, busnum=None, i2c_interface=None, **kwargs):
     """Return an I2C device for the specified address and on the specified bus.
@@ -48,6 +50,7 @@ def get_i2c_device(address, busnum=None, i2c_interface=None, **kwargs):
     if busnum is None:
         busnum = get_default_bus()
     return Device(address, busnum, i2c_interface, **kwargs)
+
 
 def require_repeated_start():
     """Enable repeated start conditions for I2C register reads.  This is the
@@ -71,67 +74,68 @@ class Device(object):
     python smbus library, or other smbus compatible I2C interface. Allows reading
     and writing 8-bit, 16-bit, and byte array values to registers
     on the device."""
+
     def __init__(self, address, busnum, i2c_interface=None):
         """Create an instance of the I2C device at the specified address on the
         specified I2C bus number."""
         self._address = address
         if i2c_interface is None:
             # Use pure python I2C interface if none is specified.
-            import PureIO
-            self._bus = PureIO.SMBus(busnum)
+            from .PureIO import SMBus
+            self._bus = SMBus(busnum)
         else:
             # Otherwise use the provided class to create an smbus interface.
             self._bus = i2c_interface(busnum)
         self._logger = logging.getLogger('Adafruit_I2C.Device.Bus.{0}.Address.{1:#0X}' \
-                                .format(busnum, address))
+                                         .format(busnum, address))
 
     def writeRaw8(self, value):
         """Write an 8-bit value on the bus (without register)."""
         value = value & 0xFF
         self._bus.write_byte(self._address, value)
         self._logger.debug("Wrote 0x%02X",
-                     value)
+                           value)
 
     def write8(self, register, value):
         """Write an 8-bit value to the specified register."""
         value = value & 0xFF
         self._bus.write_byte_data(self._address, register, value)
         self._logger.debug("Wrote 0x%02X to register 0x%02X",
-                     value, register)
+                           value, register)
 
     def write16(self, register, value):
         """Write a 16-bit value to the specified register."""
         value = value & 0xFFFF
         self._bus.write_word_data(self._address, register, value)
         self._logger.debug("Wrote 0x%04X to register pair 0x%02X, 0x%02X",
-                     value, register, register+1)
+                           value, register, register + 1)
 
     def writeList(self, register, data):
         """Write bytes to the specified register."""
         self._bus.write_i2c_block_data(self._address, register, data)
         self._logger.debug("Wrote to register 0x%02X: %s",
-                     register, data)
+                           register, data)
 
     def readList(self, register, length):
         """Read a length number of bytes from the specified register.  Results
         will be returned as a bytearray."""
         results = self._bus.read_i2c_block_data(self._address, register, length)
         self._logger.debug("Read the following from register 0x%02X: %s",
-                     register, results)
+                           register, results)
         return results
 
     def readRaw8(self):
         """Read an 8-bit value on the bus (without register)."""
         result = self._bus.read_byte(self._address) & 0xFF
         self._logger.debug("Read 0x%02X",
-                    result)
+                           result)
         return result
 
     def readU8(self, register):
         """Read an unsigned byte from the specified register."""
         result = self._bus.read_byte_data(self._address, register) & 0xFF
         self._logger.debug("Read 0x%02X from register 0x%02X",
-                     result, register)
+                           result, register)
         return result
 
     def readS8(self, register):
@@ -145,9 +149,9 @@ class Device(object):
         """Read an unsigned 16-bit value from the specified register, with the
         specified endianness (default little endian, or least significant byte
         first)."""
-        result = self._bus.read_word_data(self._address,register) & 0xFFFF
+        result = self._bus.read_word_data(self._address, register) & 0xFFFF
         self._logger.debug("Read 0x%04X from register pair 0x%02X, 0x%02X",
-                           result, register, register+1)
+                           result, register, register + 1)
         # Swap bytes if using big endian because read_word_data assumes little
         # endian on ARM (little endian) systems.
         if not little_endian:
