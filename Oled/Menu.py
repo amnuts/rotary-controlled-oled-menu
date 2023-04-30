@@ -1,5 +1,7 @@
 import os
 import threading
+from dataclasses import dataclass, field
+from typing import Union
 
 from PIL import Image, ImageDraw, ImageFont
 from RPi import GPIO
@@ -7,11 +9,25 @@ from RPi import GPIO
 from Oled import SSD1306
 
 
-class Menu:
+@dataclass
+class MenuAction:
+    text: str
+    action: callable = None
 
-    def __init__(self, options=[]):
+
+@dataclass
+class MenuParent:
+    text: str
+    actions: list[MenuAction] = field(default_factory=list)
+
+
+class Menu:
+    def __init__(self, options: list[Union[MenuParent, MenuAction]] = None):
+        if options is None:
+            options = []
         self.options = options
         self.highlight_option = None
+        self.current_menu_level = None
         self.row_count = 3
 
         self.oled = SSD1306.SSD1306_128_32(rst=None, gpio=GPIO)
@@ -25,9 +41,11 @@ class Menu:
 
         self.render_thread = None
 
-    def set_options(self, options):
-        self.options = options
-        self.highlight_option = None
+    def blank(self, draw=False):
+        self.draw.rectangle((-1, -1, self.oled.width + 1, self.oled.height + 1), outline=0, fill=0)
+        if draw:
+            self.oled.image(self.image)
+            self.oled.display()
 
     def set_highlight(self, highlight):
         if highlight is None:
@@ -41,12 +59,6 @@ class Menu:
 
     def change_highlight(self, by):
         self.set_highlight(0 if self.highlight_option is None else self.highlight_option + by)
-
-    def blank(self, draw=False):
-        self.draw.rectangle((-1, -1, self.oled.width + 1, self.oled.height + 1), outline=0, fill=0)
-        if draw:
-            self.oled.image(self.image)
-            self.oled.display()
 
     def render(self):
         if self.render_thread is None or not self.render_thread.is_alive():
@@ -78,5 +90,11 @@ class Menu:
             if self.highlight_option is not None and self.highlight_option == x:
                 self.draw.rectangle([0, top, self.oled.width, top + 11], outline=0, fill=1)
                 fill = 0
-            self.draw.text((3, top + 1), self.options[x], font=self.font, fill=fill)
+
+            if type(self.options[x]) is MenuParent:
+                display_text = f"{self.options[x].text} {'>'*20}"
+            else:
+                display_text = self.options[x].text
+
+            self.draw.text((3, top + 1), display_text, font=self.font, fill=fill)
             top += 10

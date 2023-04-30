@@ -31,7 +31,6 @@ class Rotary:
     def __pulse(self, channel):
         clk_state = GPIO.input(self.clk)
         dt_state = GPIO.input(self.dt)
-        print({"clk":clk_state, "dt":dt_state, "rotary":self.rotary_last_state, "channel":channel})
         if clk_state != self.rotary_last_state:
             self.rotary_last_state = clk_state
             if dt_state != clk_state:
