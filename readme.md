@@ -66,3 +66,9 @@ For example:
 Rotary(**{"menu": menu, "clk": 16, "dt": 18, "btn": 22})
 menu.render()
 ```
+
+### Example video
+
+Here's that example menu structure in action:
+
+https://user-images.githubusercontent.com/684421/235448510-7b16383e-a2ba-4b18-aa8a-f32ce58abf8a.mp4
