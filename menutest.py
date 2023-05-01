@@ -22,7 +22,7 @@ m = Menu([
 ])
 
 try:
-    r = Rotary(**{'menu': m, 'clk': 16, 'dt': 18, 'btn': 22})
+    Rotary(**{'menu': m, 'clk': 16, 'dt': 18, 'btn': 22})
     if len(sys.argv) > 1:
         if sys.argv[1] == 'clear':
             m.blank(True)
