@@ -13,8 +13,9 @@ m = Menu([
         MenuParent("Third sub-option", [
             MenuAction("First sub-sub-option", lambda: print("First sub-sub-option")),
             MenuAction("Second sub-sub-option", lambda: print("Second sub-sub-option")),
-            ]),
         ]),
+        MenuAction("Fourth sub-option", lambda: print("Fourth sub-option")),
+    ]),
     MenuAction("On to the forth", lambda: print("Fourth option")),
     MenuAction("Follow the fifth", lambda: print("Fifth option")),
     MenuAction("Support the sixth", lambda: print("Sixth option")),

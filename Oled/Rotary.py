@@ -40,5 +40,4 @@ class Rotary:
             self.menu.render()
 
     def __button(self, channel):
-        print(f"Button on pin {channel} pushed")
-
+        self.menu.perform_current_action()

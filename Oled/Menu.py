@@ -27,7 +27,7 @@ class Menu:
             options = []
         self.options = options
         self.highlight_option = None
-        self.current_menu_level = None
+        self.current_menu_level = self.options
         self.row_count = 3
 
         self.oled = SSD1306.SSD1306_128_32(rst=None, gpio=GPIO)
@@ -47,23 +47,35 @@ class Menu:
             self.oled.image(self.image)
             self.oled.display()
 
+    def change_highlight(self, by):
+        self.set_highlight(0 if self.highlight_option is None else self.highlight_option + by)
+
     def set_highlight(self, highlight):
+        options = self.__current_options()
         if highlight is None:
             self.highlight_option = None
         elif highlight < 0:
             self.highlight_option = 0
-        elif highlight >= len(self.options):
-            self.highlight_option = len(self.options) - 1
+        elif highlight >= len(options):
+            self.highlight_option = len(options) - 1
         else:
             self.highlight_option = highlight
-
-    def change_highlight(self, by):
-        self.set_highlight(0 if self.highlight_option is None else self.highlight_option + by)
 
     def render(self):
         if self.render_thread is None or not self.render_thread.is_alive():
             self.render_thread = threading.Thread(target=self.__render)
             self.render_thread.start()
+
+    def perform_current_action(self):
+        if self.highlight_option is None:
+            return
+        if type(self.current_menu_level[self.highlight_option]) is not MenuParent:
+            self.current_menu_level[self.highlight_option].action()
+            return
+        self.current_menu_level = self.current_menu_level[self.highlight_option].actions
+        self.highlight_option = 0
+        self.render()
+        return
 
     def __render(self):
         self.blank()
@@ -72,16 +84,23 @@ class Menu:
         self.oled.display()
 
     def __build(self):
+        options = self.__current_options()
+
         # adjust the start/end positions of the range
         if (self.highlight_option is None) or (self.highlight_option < self.row_count):
             start = 0
             end = self.row_count
-        elif self.highlight_option >= (len(self.options) - self.row_count):
-            end = len(self.options)
+        elif self.highlight_option >= (len(options) - self.row_count):
+            end = len(options)
             start = end - self.row_count
         else:
             start = self.highlight_option
             end = start + self.row_count
+
+        if start < 0:
+            start = 0
+        if end > len(options):
+            end = len(options)
 
         # draw the menu options
         top = 0
@@ -91,10 +110,15 @@ class Menu:
                 self.draw.rectangle([0, top, self.oled.width, top + 11], outline=0, fill=1)
                 fill = 0
 
-            if type(self.options[x]) is MenuParent:
-                display_text = f"{self.options[x].text} {'>'*20}"
+            if type(options[x]) is MenuParent:
+                display_text = f"{options[x].text} {'>'*20}"
             else:
-                display_text = self.options[x].text
+                display_text = options[x].text
 
             self.draw.text((3, top + 1), display_text, font=self.font, fill=fill)
             top += 10
+
+    def __current_options(self) -> list[Union[MenuParent, MenuAction]]:
+        if type(self.current_menu_level) is MenuParent:
+            return self.current_menu_level.actions
+        return self.current_menu_level
