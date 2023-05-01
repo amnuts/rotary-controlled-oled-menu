@@ -2,6 +2,7 @@ import os
 import threading
 from dataclasses import dataclass, field
 from typing import Union
+from copy import deepcopy
 
 from PIL import Image, ImageDraw, ImageFont
 from RPi import GPIO
@@ -27,7 +28,7 @@ class Menu:
             options = []
         self.options = options
         self.highlight_option = None
-        self.current_menu_level = self.options
+        self.current_menu_level = [(None, self.options)]
         self.row_count = 3
 
         self.oled = SSD1306.SSD1306_128_32(rst=None, gpio=GPIO)
@@ -69,10 +70,11 @@ class Menu:
     def perform_current_action(self):
         if self.highlight_option is None:
             return
-        if type(self.current_menu_level[self.highlight_option]) is not MenuParent:
-            self.current_menu_level[self.highlight_option].action()
+        options = self.__current_options()
+        if type(options[self.highlight_option]) is not MenuParent:
+            options[self.highlight_option].action()
             return
-        self.current_menu_level = self.current_menu_level[self.highlight_option].actions
+        self.current_menu_level.append((self.highlight_option, options[self.highlight_option].actions))
         self.highlight_option = 0
         self.render()
         return
@@ -118,7 +120,16 @@ class Menu:
             self.draw.text((3, top + 1), display_text, font=self.font, fill=fill)
             top += 10
 
-    def __current_options(self) -> list[Union[MenuParent, MenuAction]]:
-        if type(self.current_menu_level) is MenuParent:
-            return self.current_menu_level.actions
-        return self.current_menu_level
+    def __back(self):
+        if len(self.current_menu_level) > 1:
+            self.highlight_option, _ = self.current_menu_level.pop()
+        self.render()
+
+    def __current_options(self):
+        _, orig_options = self.current_menu_level[-1]
+        options = deepcopy(orig_options)
+        if type(options) is MenuParent:
+            options = options.actions
+        if len(self.current_menu_level) > 1:
+            options.insert(0, MenuAction(f"Back {'<'*20}", lambda: self.__back()))
+        return options
